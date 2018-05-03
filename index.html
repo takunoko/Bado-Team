@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="onsenui/onsenui.css">
+    <link rel="stylesheet" href="onsenui/onsen-css-components.css">
+    <script src="vue/vue.js"></script>
+    <script src="onsenui/onsenui.js"></script>
+    <script src="onsenui/vue-onsenui.js"></script>
+</head>
+
+<body>
+<template id="main-page">
+    <v-ons-page>
+        <v-ons-toolbar>
+            <div class="center">Title</div>
+        </v-ons-toolbar>
+
+        <p style="text-align: center">
+            <v-ons-button @click="$ons.notification.alert('Hello World!')">
+                Click me!
+            </v-ons-button>
+        </p>
+    </v-ons-page>
+</template>
+
+<div id="app"></div>
+
+<script>
+    var vm = new Vue({
+        el: '#app',
+        template: '#main-page'
+    });
+</script>
+</body>
+</html>
