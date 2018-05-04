@@ -4,32 +4,202 @@
     <meta charset="utf-8" />
     <link rel="stylesheet" href="onsenui/onsenui.css">
     <link rel="stylesheet" href="onsenui/onsen-css-components.css">
+
     <script src="vue/vue.js"></script>
+    <script src="vue/vuex.js"></script>
     <script src="onsenui/onsenui.js"></script>
     <script src="onsenui/vue-onsenui.js"></script>
 </head>
 
 <body>
-<template id="main-page">
+<template id="main">
+    <v-ons-navigator
+            swipeable
+            :page-stack="pageStack"
+            @push-page="pageStack.push($event)"
+    ></v-ons-navigator>
+</template>
+
+<template id="main_page">
     <v-ons-page>
         <v-ons-toolbar>
-            <div class="center">Title</div>
+            <div class="center">グループ分け</div>
         </v-ons-toolbar>
 
+        <v-ons-list>
+            <v-ons-list-item>
+                <div class="left">
+                    <v-ons-button modifier="cta" style="margin: 6px 0" v-on:click="p_num_decrement">ー</v-ons-button>
+                </div>
+                <div class="center">
+                    <!-- <v-ons-input placeholder="参加人数" float @input="p_num_setter" :value="player_num"> <!-- v-modelを使うと、書き換えが自動で走るので+/-で操作するとエラーを吐くので良くない。でも無視。 -->
+                    <v-ons-input placeholder="参加人数" float v-model="player_num">
+                    </v-ons-input>
+                </div>
+                <div class="right">
+                    <v-ons-button modifier="cta" style="margin: 6px 0" @click="p_num_increment">＋</v-ons-button>
+                </div>
+            </v-ons-list-item>
+            <v-ons-list-item>
+                <div class="center">
+                    <v-ons-input placeholder="1グループの人数" float v-model="member_num">
+                </v-ons-input>
+                </div>
+            </v-ons-list-item>
+        </v-ons-list>
+
+        <v-ons-list>
+            <v-ons-list-header>抽選条件</v-ons-list-header>
+            <v-ons-list-item>
+                <div class="right">参加人数 {{ player_num || 0 }}人</div>
+            </v-ons-list-item>
+            <v-ons-list-item>
+                <div class="right">{{ member_num || 0 }}人/グループ</div>
+            </v-ons-list-item>
+
+            <v-ons-list-item>
+                <div class="right">{{ Math.floor(player_num / member_num) || 0 }} グループ</div>
+            </v-ons-list-item>
+            <v-ons-list-item>
+                <div class="right">はずれ {{ player_num % member_num || 0 }}人</div>
+            </v-ons-list-item>
+        </v-ons-list>
+
+
         <p style="text-align: center">
-            <v-ons-button @click="$ons.notification.alert('Hello World!')">
-                Click me!
+            <v-ons-button @click="lottery_button">
+                抽選開始
             </v-ons-button>
         </p>
+    </v-ons-page>
+</template>
+
+<template id="lottery">
+    <v-ons-page @show="make_lots">
+        <v-ons-toolbar>
+            <div class="left">
+                <v-ons-back-button>Top</v-ons-back-button>
+            </div>
+            <div class="center">抽選</div>
+        </v-ons-toolbar>
+        <div style="height: 50%; width: 100%; padding: 10px auto;">
+            <v-ons-button style="height:100%; width: 100%;" @click="take_lots">抽選</v-ons-button>
+        </div>
+        <div style="height: 10%; width: 100%; padding: 10px auto;">
+            <v-ons-button modifier="outline" style="height:100%; width: 100%;">絶対当たる</v-ons-button>
+        </div>
+        <div>
+            <v-ons-list>
+                <v-ons-list-item>参加人数 : {{ player_num }}</v-ons-list-item>
+                <v-ons-list-item>1チームの人数 : {{ member_num }}</v-ons-list-item>
+                <v-ons-list-item>残り{{ lots_num }}</v-ons-list-item>
+                <v-ons-list-item></v-ons-list-item>
+                <v-ons-list-item></v-ons-list-item>
+            </v-ons-list>
+        </div>
+        <p>抽選ページ</p>
     </v-ons-page>
 </template>
 
 <div id="app"></div>
 
 <script>
-    var vm = new Vue({
+    const store = new Vuex.Store({
+        strict: false, // 非厳格モード
+        state: {
+            player_num: 1,
+            member_num: 1
+        },
+        mutations: {
+            p_num_increment(){ this.state.player_num++; },
+            p_num_decrement(){
+                if (this.state.player_num > 1)
+                    this.state.player_num--;
+            },
+            p_num_setter(state, message){
+                state.player_num = message
+            },
+            m_num_setter(state, message){
+                state.member_num = message
+            }
+        },
+        getters: {
+            player_num(state) { return state.player_num },
+            member_num(state) { return state.member_num }
+        }
+
+    })
+
+    const lottery = {
+        key: 'lottery',
+        template: '#lottery',
+        computed: {
+            player_num () {
+                return store.state.player_num
+            },
+            member_num () {
+                return store.state.member_num
+            }
+        },
+        data() {
+            return {
+                lots_num: 0
+            }
+        },
+        methods: {
+            make_lots() {
+                console.log("make_lots");
+                this.lots_num = store.state.player_num;
+            },
+            take_lots() {
+                this.lots_num--;
+            },
+        }
+    };
+
+    const main_page = {
+        key: 'main_page',
+        template: '#main_page',
+        computed: {
+            player_num: {
+                get: function () { return store.getters.player_num },
+                set: function (val) { store.commit('p_num_setter', val) }
+            },
+            member_num: {
+                get: function () { return store.getters.member_num},
+                set: function (val) { store.commit('m_num_setter', val) }
+            }
+        },
+        methods: {
+            lottery_button() {
+                this.$emit('push-page', {
+                    extends: lottery
+                });
+            },
+            p_num_increment() {
+                store.commit('p_num_increment')
+            },
+            p_num_decrement() {
+                store.commit('p_num_decrement')
+            },
+            p_num_setter(e) {
+                store.commit('p_num_setter', e.target.value)
+            },
+            m_num_setter(e) {
+                store.commit('m_num_setter', e.target.value)
+            }
+        }
+    };
+
+    new Vue({
         el: '#app',
-        template: '#main-page'
+        template: '#main',
+        data() {
+            return {
+                pageStack: [main_page],
+                p_num: 10
+            };
+        }
     });
 </script>
 </body>
