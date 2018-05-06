@@ -146,8 +146,10 @@
                 }
             },
             m_num_increment(){
-                this.state.member_num++;
-                this.state.team_num = Math.floor(this.state.player_num / this.state.member_num);
+                if (this.state.member_num < this.state.player_num) {
+                    this.state.member_num++;
+                    this.state.team_num = Math.floor(this.state.player_num / this.state.member_num);
+                }
             },
             m_num_decrement(){
                 if (this.state.member_num > 1) {
