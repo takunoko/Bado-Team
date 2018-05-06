@@ -20,6 +20,7 @@
     ></v-ons-navigator>
 </template>
 
+<!-- 抽選条件を入力するページ -->
 <template id="main_page">
     <v-ons-page>
         <v-ons-toolbar>
@@ -27,23 +28,42 @@
         </v-ons-toolbar>
 
         <v-ons-list>
+            <v-ons-list-title>参加人数</v-ons-list-title>
             <v-ons-list-item>
                 <div class="left">
-                    <v-ons-button modifier="cta" style="margin: 6px 0" v-on:click="p_num_decrement">ー</v-ons-button>
+                    <v-ons-button modifier="cta" style="margin: 6px 0" @click="p_num_decrement">ー</v-ons-button>
                 </div>
                 <div class="center">
-                    <!-- <v-ons-input placeholder="参加人数" float @input="p_num_setter" :value="player_num"> <!-- v-modelを使うと、書き換えが自動で走るので+/-で操作するとエラーを吐くので良くない。でも無視。 -->
-                    <v-ons-input placeholder="参加人数" float v-model="player_num">
+                    <v-ons-input placeholder="参加人数" float v-model="player_num" type="number" min="1">
                     </v-ons-input>
                 </div>
                 <div class="right">
                     <v-ons-button modifier="cta" style="margin: 6px 0" @click="p_num_increment">＋</v-ons-button>
                 </div>
             </v-ons-list-item>
+            <v-ons-list-title>1グループの人数</v-ons-list-title>
             <v-ons-list-item>
+                <div class="left">
+                    <v-ons-button modifier="cta" style="margin: 6px 0" @click="m_num_decrement">ー</v-ons-button>
+                </div>
                 <div class="center">
-                    <v-ons-input placeholder="1グループの人数" float v-model="member_num">
-                </v-ons-input>
+                    <v-ons-input placeholder="1グループの人数" float v-model="member_num" type="number" min="1">
+                    </v-ons-input>
+                </div>
+                <div class="right">
+                    <v-ons-button modifier="cta" style="margin: 6px 0" @click="m_num_increment">＋</v-ons-button>
+                </div>
+            </v-ons-list-item>
+            <v-ons-list-title>グループ数</v-ons-list-title>
+            <v-ons-list-item>
+                <div class="left">
+                    <v-ons-button modifier="cta" style="margin: 6px 0" @click="t_num_decrement">ー</v-ons-button>
+                </div>
+                <div>
+                    <v-ons-input placeholder="グループの数" float v-model="team_num" type="number" min="1"></v-ons-input>
+                </div>
+                <div class="right">
+                    <v-ons-button modifier="cta" style="margin: 6px 0" @click="t_num_increment">＋</v-ons-button>
                 </div>
             </v-ons-list-item>
         </v-ons-list>
@@ -51,17 +71,7 @@
         <v-ons-list>
             <v-ons-list-header>抽選条件</v-ons-list-header>
             <v-ons-list-item>
-                <div class="right">参加人数 {{ player_num || 0 }}人</div>
-            </v-ons-list-item>
-            <v-ons-list-item>
-                <div class="right">{{ member_num || 0 }}人/グループ</div>
-            </v-ons-list-item>
-
-            <v-ons-list-item>
-                <div class="right">{{ Math.floor(player_num / member_num) || 0 }} グループ</div>
-            </v-ons-list-item>
-            <v-ons-list-item>
-                <div class="right">はずれ {{ player_num % member_num || 0 }}人</div>
+                <div class="right">はずれ {{ player_num - (member_num * team_num) || 0 }}人</div>
             </v-ons-list-item>
         </v-ons-list>
 
@@ -74,6 +84,7 @@
     </v-ons-page>
 </template>
 
+<!-- 抽選を行うページ -->
 <template id="lottery">
     <v-ons-page @show="make_lots">
         <v-ons-toolbar>
@@ -86,46 +97,90 @@
             <v-ons-button style="height:100%; width: 100%;" @click="take_lots">抽選</v-ons-button>
         </div>
         <div style="height: 10%; width: 100%; padding: 10px auto;">
-            <v-ons-button modifier="outline" style="height:100%; width: 100%;">絶対当たる</v-ons-button>
+            <v-ons-button modifier="outline" style="height:100%; width: 100%;" @click="take_win_lots">絶対当たる</v-ons-button>
         </div>
         <div>
             <v-ons-list>
+                <!--
                 <v-ons-list-item>参加人数 : {{ player_num }}</v-ons-list-item>
                 <v-ons-list-item>1チームの人数 : {{ member_num }}</v-ons-list-item>
-                <v-ons-list-item>残り{{ lots_num }}</v-ons-list-item>
-                <v-ons-list-item></v-ons-list-item>
-                <v-ons-list-item></v-ons-list-item>
+                -->
+                <v-ons-list-item>残り{{ lottery_list.length }}</v-ons-list-item>
             </v-ons-list>
         </div>
-        <p>抽選ページ</p>
+
+        <v-ons-dialog
+                cancelable
+                :visible.sync="lottery_dialog_visible"
+        >
+            <p>あなたは {{ your_num }} 番です。</p>
+        </v-ons-dialog>
+
     </v-ons-page>
 </template>
 
 <div id="app"></div>
 
+<script src="tools.js"></script>
+
 <script>
     const store = new Vuex.Store({
         strict: false, // 非厳格モード
         state: {
-            player_num: 1,
-            member_num: 1
+            // player_num: 1,
+            // member_num: 1,
+            // team_num: 1
+            player_num: 3,
+            member_num: 2,
+            team_num: 1
         },
         mutations: {
-            p_num_increment(){ this.state.player_num++; },
+            p_num_increment(){
+                this.state.player_num++;
+                this.state.team_num = Math.floor(this.state.player_num / this.state.member_num);
+            },
             p_num_decrement(){
-                if (this.state.player_num > 1)
+                if (this.state.player_num > 1) {
                     this.state.player_num--;
+                    this.state.team_num = Math.floor(this.state.player_num / this.state.member_num);
+                }
+            },
+            m_num_increment(){
+                this.state.member_num++;
+                this.state.team_num = Math.floor(this.state.player_num / this.state.member_num);
+            },
+            m_num_decrement(){
+                if (this.state.member_num > 1) {
+                    this.state.member_num--;
+                    this.state.team_num = Math.floor(this.state.player_num / this.state.member_num);
+                }
+            },
+            t_num_increment() {
+                if (Math.floor(this.state.player_num / this.state.member_num) > this.state.team_num) {
+                    this.state.team_num++;
+                }
+            },
+            t_num_decrement(){
+                if (this.state.team_num > 1) {
+                    this.state.team_num--;
+                }
             },
             p_num_setter(state, message){
-                state.player_num = message
+                state.player_num = message;;
+                this.state.team_num = Math.floor(this.state.player_num / this.state.member_num);
             },
             m_num_setter(state, message){
-                state.member_num = message
+                state.member_num = message;;
+                this.state.team_num = Math.floor(this.state.player_num / this.state.member_num);
+            },
+            t_num_setter(state, message){
+                state.team_num = message;
             }
         },
         getters: {
             player_num(state) { return state.player_num },
-            member_num(state) { return state.member_num }
+            member_num(state) { return state.member_num },
+            team_num(state) { return state.team_num }
         }
 
     })
@@ -134,26 +189,68 @@
         key: 'lottery',
         template: '#lottery',
         computed: {
-            player_num () {
-                return store.state.player_num
+            player_num: {
+                get: function () { return store.getters.player_num },
+                set: function (val) { store.commit('p_num_setter', val) }
             },
-            member_num () {
-                return store.state.member_num
+            member_num: {
+                get: function () { return store.getters.member_num},
+                set: function (val) { store.commit('m_num_setter', val) }
+            },
+            team_num: {
+                get: function () { return store.getters.team_num},
+                set: function (val) { store.commit('t_num_setter', val) }
             }
         },
         data() {
             return {
-                lots_num: 0
-            }
+                fail_num: 0,
+                your_num: 0,
+                lottery_dialog_visible: false,
+                lottery_list: []
+            };
         },
         methods: {
             make_lots() {
-                console.log("make_lots");
-                this.lots_num = store.state.player_num;
+                this.lottery_list = make_lottery(store.state.player_num, store.state.member_num, store.state.team_num);
+                console.log(this.lottery_list);
+                console.log(this.lottery_list.length);
+                this.fail_num = store.state.player_num - (store.state.team_num * store.state.member_num)
             },
             take_lots() {
-                this.lots_num--;
+                if (this.lottery_list.length <= 0) {
+                    this.$ons.notification.alert("全ての抽選は終了しています。", {cancelable: true});
+                    return;
+                }
+                var ret_arr = cast_lots(this.lottery_list);  // 抽選関数
+
+                this.your_num = ret_arr[0];      // 当選番号
+                this.lottery_list = ret_arr[1];  // 関数に配列を渡して変更しても、参照もとの配列は変更されないみたいなので、こいうった実装にした。
+
+                if (this.your_num == 0) {
+                    this.fail_num--;
+                }
+
+                if (this.your_num != 0) {
+                    this.$ons.notification.alert('あなたは"' + this.your_num + '"番です。', {cancelable: true});
+                } else {
+                    this.$ons.notification.alert('あなたは' + '"はずれ"' + 'です。', {cancelable: true});
+                }
             },
+            take_win_lots() {
+                if (this.lottery_list.length <= 0) {
+                    this.$ons.notification.alert("全ての抽選は終了しています。", {cancelable: true});
+                    return;
+                }
+                if (this.lottery_list.length - this.fail_num >= 1) {
+                    var ret_arr = cast_win_lots(this.lottery_list);
+                    this.your_num = ret_arr[0];
+                    this.lottery_list = ret_arr[1];
+                    this.$ons.notification.alert("あなたは" + this.your_num + "番です。", {cancelable: true});
+                } else {
+                    this.$ons.notification.alert('"あたり"はもうありません。', {cancelable: true});
+                }
+            }
         }
     };
 
@@ -168,6 +265,10 @@
             member_num: {
                 get: function () { return store.getters.member_num},
                 set: function (val) { store.commit('m_num_setter', val) }
+            },
+            team_num: {
+                get: function () { return store.getters.team_num},
+                set: function (val) { store.commit('t_num_setter', val) }
             }
         },
         methods: {
@@ -182,11 +283,26 @@
             p_num_decrement() {
                 store.commit('p_num_decrement')
             },
+            m_num_increment() {
+                store.commit('m_num_increment')
+            },
+            m_num_decrement() {
+                store.commit('m_num_decrement')
+            },
+            t_num_increment() {
+                store.commit('t_num_increment')
+            },
+            t_num_decrement() {
+                store.commit('t_num_decrement')
+            },
             p_num_setter(e) {
                 store.commit('p_num_setter', e.target.value)
             },
             m_num_setter(e) {
                 store.commit('m_num_setter', e.target.value)
+            },
+            t_num_setter(e) {
+                store.commit('t_num_setter', e.target.value)
             }
         }
     };
@@ -197,7 +313,6 @@
         data() {
             return {
                 pageStack: [main_page],
-                p_num: 10
             };
         }
     });
