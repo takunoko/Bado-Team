@@ -9,6 +9,9 @@
     <script src="vue/vuex.js"></script>
     <script src="onsenui/onsenui.js"></script>
     <script src="onsenui/vue-onsenui.js"></script>
+
+    <!-- 自作ファイル -->
+    <link rel="stylesheet" href="index.css">
 </head>
 
 <body>
@@ -93,11 +96,11 @@
             </div>
             <div class="center">抽選</div>
         </v-ons-toolbar>
-        <div style="height: 50%; width: 100%; padding: 10px auto;">
-            <v-ons-button style="height:100%; width: 100%;" @click="take_lots">抽選</v-ons-button>
+        <div id="lots_button_box">
+            <v-ons-button id="lots_button" @click="take_lots">抽選</v-ons-button>
         </div>
-        <div style="height: 10%; width: 100%; padding: 10px auto;">
-            <v-ons-button modifier="outline" style="height:100%; width: 100%;" @click="take_win_lots">絶対当たる</v-ons-button>
+        <div id="lots_win_button_box">
+            <v-ons-button id="lots_win_button" modifier="outline" @click="take_win_lots">絶対当たる</v-ons-button>
         </div>
         <div>
             <v-ons-list>
@@ -130,7 +133,7 @@
             // player_num: 1,
             // member_num: 1,
             // team_num: 1
-            player_num: 3,
+            player_num: 5,
             member_num: 2,
             team_num: 1
         },
@@ -220,10 +223,9 @@
                 this.fail_num = store.state.player_num - (store.state.team_num * store.state.member_num)
             },
             take_lots() {
-                if (this.lottery_list.length <= 0) {
-                    this.$ons.notification.alert("全ての抽選は終了しています。", {cancelable: true});
+                if ( end_lot_check(this, this.lottery_list) )
                     return;
-                }
+
                 var ret_arr = cast_lots(this.lottery_list);  // 抽選関数
 
                 this.your_num = ret_arr[0];      // 当選番号
@@ -232,15 +234,11 @@
                 if (this.your_num == 0) {
                     this.fail_num--;
                 }
+                result_alert(this, this.your_num);
 
-                if (this.your_num != 0) {
-                    this.$ons.notification.alert('あなたは"' + this.your_num + '"番です。', {cancelable: true});
-                } else {
-                    this.$ons.notification.alert('あなたは' + '"はずれ"' + 'です。', {cancelable: true});
-                }
             },
             take_win_lots() {
-                if (this.lottery_list.length <= 0) {
+                if ( end_lot_check(this, this.lottery_list)) {
                     this.$ons.notification.alert("全ての抽選は終了しています。", {cancelable: true});
                     return;
                 }
@@ -248,7 +246,7 @@
                     var ret_arr = cast_win_lots(this.lottery_list);
                     this.your_num = ret_arr[0];
                     this.lottery_list = ret_arr[1];
-                    this.$ons.notification.alert("あなたは" + this.your_num + "番です。", {cancelable: true});
+                    result_alert(this, this.your_num);
                 } else {
                     this.$ons.notification.alert('"あたり"はもうありません。', {cancelable: true});
                 }
@@ -318,6 +316,51 @@
             };
         }
     });
+
+
+    // 結果を表示するアラートについて。(果たしてここに書くのは正しいのか…?)
+    function result_alert(page, result) {
+        var css_txt = "";
+        // cssのセレクタを出た番号によって分ける。7番以降は共通に扱う。
+        switch (result){
+            case 1:
+                css_txt = "lot_1_result";
+                break;
+            case 2:
+                css_txt = "lot_2_result";
+                break;
+            case 3:
+                css_txt = "lot_3_result";
+                break;
+            case 4:
+                css_txt = "lot_4_result";
+                break;
+            case 5:
+                css_txt = "lot_5_result";
+                break;
+            case 6:
+                css_txt = "lot_6_result";
+                break;
+            default:
+                css_txt = "lot_common_result";
+                break;
+        }
+        if (result != 0){
+            page.$ons.notification.alert('あなたは <span id="lot_win_result"><span id="'+css_txt+'">' + result + '</span></span> 番です。', {cancelable: true, title:"抽選結果"});
+        } else {
+            page.$ons.notification.alert('あなたは' + '<span id="lot_fail_result">はずれ</span>' + 'です。', {cancelable: true, title:"抽選結果"});
+        }
+    }
+
+    // 抽選が終了しているかを調べて、終了していたらalertを出す関数。
+    // alertの箇所をまとめて書きたいから作った。
+    function end_lot_check(page, lottery_list) {
+        if (lottery_list.length <= 0) {
+            page.$ons.notification.alert("全ての抽選は終了しています。", {cancelable: true, title: "抽選終了"});
+            return true; // 終了していたら "true"
+        }
+        return false;    // 終了していなかったら "false"
+    }
 </script>
 </body>
 </html>

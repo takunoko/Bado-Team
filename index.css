@@ -1,0 +1,67 @@
+
+/* Top(設定)画面 */
+.text-input {
+    text-align: center;
+    font-size: x-large;
+}
+
+/* 抽選結果画面 */
+
+#lots_button_box {
+    height: 45%;
+    width: 95%;
+    padding: 2.5%;
+}
+
+#lots_win_button_box {
+    height: 10%;
+    width: 95%;
+    padding: 2.5%;
+}
+
+#lots_button {
+    height: 100%;
+    width: 100%;
+    text-align: center;
+}
+
+#lots_win_button{
+    height: 100%;
+    width: 100%;
+    text-align: center;
+}
+
+#lot_fail_result {
+   font-weight: bold;
+   font-size: 45px;
+   color: #a851ff;
+}
+
+#lot_win_result {
+   font-weight: bold;
+   font-size: 100px;
+}
+
+
+#lot_1_result {
+   color: #ff5151;
+}
+#lot_2_result {
+   color: #ff51ff;
+}
+#lot_3_result {
+   color: #5151ff
+}
+#lot_4_result {
+   color: #51ffff;
+}
+#lot_5_result {
+   color: #51ff51;
+}
+#lot_6_result {
+   color: #ffa851
+}
+
+#lot_common_result {
+   color: #666;
+}
