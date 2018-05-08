@@ -143,9 +143,11 @@
                 this.state.team_num = Math.floor(this.state.player_num / this.state.member_num);
             },
             p_num_decrement(){
-                if (this.state.player_num > 1) {
+                if (this.state.player_num > 1) { // プレイヤー数が0を下回らないようにするk
                     this.state.player_num--;
-                    this.state.team_num = Math.floor(this.state.player_num / this.state.member_num);
+                    if (this.state.player_num < this.state.member_num) // プレイヤー数がメンバー数を下回らないようにする。
+                        this.state.member_num--;
+                    this.state.team_num = Math.floor(this.state.player_num / this.state.member_num);    // チーム数を更新
                 }
             },
             m_num_increment(){
