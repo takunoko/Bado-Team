@@ -40,6 +40,7 @@
             swipeable
             :page-stack="pageStack"
             @push-page="pageStack.push($event)"
+            @pop-page="pageStack.pop()"
     ></v-ons-navigator>
 </template>
 
@@ -260,10 +261,9 @@
 
             },
             take_win_lots() {
-                if ( end_lot_check(this, this.lottery_list)) {
-                    this.$ons.notification.alert("全ての抽選は終了しています。", {cancelable: true});
+                if ( end_lot_check(this, this.lottery_list))
                     return;
-                }
+
                 if (this.lottery_list.length - this.fail_num >= 1) {
                     var ret_arr = cast_win_lots(this.lottery_list);
                     this.your_num = ret_arr[0];
@@ -334,7 +334,7 @@
         template: '#main',
         data() {
             return {
-                pageStack: [main_page],
+                pageStack: [main_page]
             };
         }
     });
@@ -378,8 +378,18 @@
     // alertの箇所をまとめて書きたいから作った。
     function end_lot_check(page, lottery_list) {
         if (lottery_list.length <= 0) {
-            page.$ons.notification.alert("全ての抽選は終了しています。", {cancelable: true, title: "抽選終了"});
-            return true; // 終了していたら "true"
+            page.$ons.notification.confirm("全ての抽選は終了しています。", {
+                cancelable: true,
+                title: "抽選終了",
+                buttonLabels: ["Topへ", "了解"],
+                callback: function(index) {
+                    // index:= -1:キャンセル(ダイアログ外タップ), 0:右側(Topへ), 1:左側(了解)
+                    if (index == 0) {
+                        page.$emit('pop-page');    // Topへをクリックでトップページにいきなり飛ぶ
+                    }
+                }
+            });
+            return true;
         }
         return false;    // 終了していなかったら "false"
     }
