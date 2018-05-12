@@ -8,27 +8,31 @@
 /* 抽選結果画面 */
 
 #lots_button_box {
-    height: 45%;
-    width: 95%;
+    display: table; /* 好きじゃないな〜 */
+    width: 95%; /* padding左右と合わせて100% */
     padding: 2.5%;
 }
 
 #lots_win_button_box {
-    height: 10%;
-    width: 95%;
+    display: table; /* 好きじゃないな〜 */
+    width: 95%; /* padding左右と合わせて100% */
     padding: 2.5%;
 }
 
 #lots_button {
-    height: 100%;
-    width: 100%;
+    height: 50vh;
+    display: table-cell;
     text-align: center;
+    vertical-align: middle;
+    font-size: 30vmin;
 }
 
 #lots_win_button{
-    height: 100%;
-    width: 100%;
+    height: 15vh;
+    display: table-cell;
     text-align: center;
+    vertical-align: middle;
+    font-size: 10vmin;
 }
 
 #lot_fail_result {
