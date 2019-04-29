@@ -117,10 +117,10 @@
             </div>
             <div class="center">抽選</div>
         </v-ons-toolbar>
-        <div id="lots_button_box">
+        <div class="lots_button_box">
             <v-ons-button id="lots_button" @click="take_lots">抽選</v-ons-button>
         </div>
-        <div id="lots_win_button_box">
+        <div class="lots_button_box">
             <v-ons-button id="lots_win_button" modifier="outline" @click="take_win_lots">絶対当たる</v-ons-button>
         </div>
         <div>
@@ -129,9 +129,14 @@
                 <v-ons-list-item>参加人数 : {{ player_num }}</v-ons-list-item>
                 <v-ons-list-item>1チームの人数 : {{ member_num }}</v-ons-list-item>
                 -->
-                <v-ons-list-item>残り{{ lottery_list.length }}</v-ons-list-item>
+                <v-ons-list-item>残り {{ lottery_list.length }}人</v-ons-list-item>
             </v-ons-list>
         </div>
+
+        <div class="lots_button_box">
+            <v-ons-button id="lots_lose_button" modifier="outline" @click="take_lose_lots">絶対ハズレ</v-ons-button>
+        </div>
+
 
         <v-ons-dialog
                 cancelable
@@ -154,8 +159,8 @@
             // player_num: 1,
             // member_num: 1,
             // team_num: 1
-            player_num: 5,
-            member_num: 2,
+            player_num: 4,
+            member_num: 4,
             team_num: 1
         },
         mutations: {
@@ -271,6 +276,20 @@
                     result_alert(this, this.your_num);
                 } else {
                     this.$ons.notification.alert('"あたり"はもうありません。', {cancelable: true});
+                }
+            },
+            take_lose_lots() {
+                if (end_lot_check(this, this.lottery_list))
+                    return;
+
+                if (this.fail_num >= 1) { // ハズレくじを実際に引く操作
+                    var ret_arr = cast_lose_lots(this.lottery_list);
+                    this.your_num = ret_arr[0];
+                    this.lottery_list = ret_arr[1];
+                    this.fail_num--;
+                    result_alert(this, this.your_num);
+                } else {
+                    this.$ons.notification.alert('"ハズレ"はもうありません。', {cancelable: true});
                 }
             }
         }

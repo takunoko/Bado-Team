@@ -62,3 +62,19 @@ function cast_win_lots(array){
 
     return [your_num, local_array]  // 本来は呼ばれるはずがない。
 }
+
+// 絶対ハズレボタン
+function cast_lose_lots(array){
+    var your_num = 0;
+    var local_array = array;
+    for (var i=0; i < local_array.length; i++) {
+        if(local_array[i] == 0) {
+            your_num = local_array[i];
+            local_array.splice(i, 1);
+            return [your_num, local_array];
+        }
+    }
+    your_num = local_array.pop();
+
+    return [your_num, local_array] // 呼ばれたらおかしい
+}
