@@ -71,7 +71,8 @@ function cast_lose_lots(array){
         if(local_array[i] == 0) {
             your_num = local_array[i];
             local_array.splice(i, 1);
-            return [your_num, local_array];
+            var s_local_array = shuffle(lottery);
+            return [your_num, s_local_array];
         }
     }
     your_num = local_array.pop();
